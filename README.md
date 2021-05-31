@@ -33,3 +33,15 @@ Use Size() to get to current volume in the bucket.
 ```go
 bucket.Size()
 ```
+
+### Common use case(s)
+#### API's rate limiter. 
+  
+In this use you can read:
+- NewTickLeakyBucket() as `How many requests per second it's gonna handle?`
+- Refill() as `Can I respond this request?`
+    - ErrBucketReachedCap as `Reched the server limit`
+- Fix() as `From now on I'm no longer accepting requests`
+- Size() as `How many requests are in flight?`
+
+eg: `NewTickLeakyBucket(3, 1 * time.Second)` -> 3 requests / second.

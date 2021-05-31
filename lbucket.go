@@ -46,12 +46,11 @@ func NewTickLeakyBucket(capacity uint, freq time.Duration, opts ...tickerOption)
 	}
 
 	go func() {
-		defer ticker.Stop()
-
 		rcv := ticker.Receiver()
 		for {
 			select {
 			case <-bucket.done:
+				ticker.Stop()
 				return
 			case _ = <-rcv:
 				bucket.leak()

@@ -85,6 +85,7 @@ type FakeTicker struct {
 	isStopped bool
 	once      sync.Once
 	TimeC     chan time.Time
+	done      chan struct{}
 }
 
 func NewFakeTicker() *FakeTicker {
@@ -92,17 +93,25 @@ func NewFakeTicker() *FakeTicker {
 		isStopped: false,
 		once:      sync.Once{},
 		TimeC:     make(chan time.Time),
+		done:      make(chan struct{}),
 	}
 }
 
 func (f *FakeTicker) Stop() {
 	f.once.Do(func() {
-		f.isStopped = true
+		f.done <- struct{}{}
 	})
 }
 
 func (f *FakeTicker) IsStopped() bool {
-	return f.isStopped
+	for {
+		select {
+		case <-f.done:
+			return false
+		default:
+			return true
+		}
+	}
 }
 
 func (f *FakeTicker) Receiver() <-chan time.Time {
